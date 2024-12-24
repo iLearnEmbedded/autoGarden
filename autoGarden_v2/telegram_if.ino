@@ -23,3 +23,21 @@ void telegram_task(void)
     bot.sendMessage(CHAT_ID, "Hi Pawan");  
   }  
 }
+
+void telegram_send_flowMsg(int state)
+{
+  if(WiFi.status() != WL_CONNECTED)
+  {
+    return;
+  }
+  
+  if (state == 0)
+  {
+    bot.sendMessage(CHAT_ID, "Water Stagnant");  
+  }
+
+  else
+  {
+    bot.sendMessage(CHAT_ID, "Water Flowing");  
+  }
+}
