@@ -8,6 +8,7 @@ void setup()
   Serial.begin(115200); 
   telegram_setup();
   flowsensor_setup();
+  time_setup();
 }
 
 void loop() 
@@ -26,5 +27,7 @@ void loop()
     {
       Serial.println("Please connect");
     }
+
+    time_task();
     delay(1000);    
 }
