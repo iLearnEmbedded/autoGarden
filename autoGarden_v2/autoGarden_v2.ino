@@ -14,19 +14,6 @@ void loop()
 {
     wifi_task();  
     telegram_task();
-    if(flowsensor_task() & 0x80)
-    {
-      telegram_send_flowMsg(flowsensor_get_state());
-    }
-    if(WiFi.status() == WL_CONNECTED)
-    {
-      Serial.println("Connected");  
-    }    
-    else
-    {
-      Serial.println("Please connect");
-    }
-
-    time_task();
-    delay(1000);    
+    flowsensor_task();    
+    time_task();      
 }

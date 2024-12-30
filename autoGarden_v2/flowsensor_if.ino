@@ -16,7 +16,7 @@ void flow_isr(void)
   flow_isr_count++;
 }
 
-int flowsensor_task(void)
+void flowsensor_task(void)
 {
   int flow_change_bit = 0;
   if(flow_isr_count > FLOW_THRESHOLD)
@@ -35,9 +35,9 @@ int flowsensor_task(void)
     Serial.println("Flow Sensor state");
     prev_flow_state = flow_state;
     flow_change_bit = 0x80;
-  }
 
-  return flow_state | flow_change_bit;  
+    telegram_send_flowMsg(flow_state);
+  }   
 }
 
 int flowsensor_get_state(void)
