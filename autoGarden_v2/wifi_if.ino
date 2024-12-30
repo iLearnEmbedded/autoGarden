@@ -1,7 +1,12 @@
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 
-
-void wifi_setup_task(void) 
+int WIFI_RST_SWITCH = 23;
+void wifi_setup(void)
+{
+  WiFi.mode(WIFI_STA);
+  pinMode (WIFI_RST_SWITCH, INPUT_PULLUP);
+}
+void wifi_task(void) 
 {    
     if(digitalRead(WIFI_RST_SWITCH) == LOW)
     {
