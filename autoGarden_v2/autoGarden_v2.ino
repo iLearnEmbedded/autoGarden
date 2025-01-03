@@ -2,12 +2,12 @@
 
 
 void setup() 
-{  
-  Serial.begin(115200); 
+{ 
   wifi_setup();
   telegram_setup();
   flowsensor_setup();
   time_setup();
+  btn_setup();
 }
 
 void loop() 
@@ -15,5 +15,6 @@ void loop()
     wifi_task();  
     telegram_task();
     flowsensor_task();    
-    time_task();      
+    time_task();
+    btn_task();      
 }

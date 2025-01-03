@@ -3,6 +3,7 @@
 int WIFI_RST_SWITCH = 23;
 void wifi_setup(void)
 {
+  Serial.begin(115200); 
   WiFi.mode(WIFI_STA);
   pinMode (WIFI_RST_SWITCH, INPUT_PULLUP);
 }
