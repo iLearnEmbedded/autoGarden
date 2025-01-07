@@ -3,7 +3,7 @@ int STOP_BTN  = 18;
 int SAFETY_RLY = 5;
 
 
-#define MINS_THRESH   1 //in minutes = Auto Cutoff Threshold Time
+#define MINS_THRESH   5 //in minutes = Auto Cutoff Threshold Time
 
 #define DELTA_MINS(start_min , end_min) ((end_min >= start_min)?(end_min - start_min):(end_min + (60-start_min)))
 int motor_status = 0;
@@ -48,6 +48,7 @@ void btn_task(void)
   {
     if(DELTA_MINS(tm_min, start_tm_min) > MINS_THRESH)
     {
+      telegram_send_SafetyStop();
       btn_activate_stop();
     }
   }

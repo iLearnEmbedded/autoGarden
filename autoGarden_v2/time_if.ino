@@ -22,6 +22,10 @@ void printLocalTime()
   struct tm timeinfo;
   if(!getLocalTime(&timeinfo)){
     Serial.println("No time available (yet)");
+    if(WiFi.status() != WL_CONNECTED)
+    {
+      Serial.println("Wifi not connected");  
+    }
     time_available = 0;
     return;
   }

@@ -79,3 +79,10 @@ void telegram_send_flowMsg(int state)
     bot.sendMessage(CHAT_ID, "Water Flowing");  
   }
 }
+
+
+void telegram_send_SafetyStop(void)
+{
+    bot.sendMessage(chat_id,"Safety Turning Motor OFF");
+    bot.sendMessage(CHAT_ID,"Safety Turning Motor OFF");
+}
