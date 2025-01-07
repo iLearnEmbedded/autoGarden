@@ -39,7 +39,7 @@ void handleNewMessages(int numNewMessages)
       btn_activate_start();
     }
 
-    else if (text == "start") 
+    else if (text == "stop") 
     {
       bot.sendMessage(chat_id,"Turning Motor OFF");
       bot.sendMessage(CHAT_ID,"Turning Motor OFF");
