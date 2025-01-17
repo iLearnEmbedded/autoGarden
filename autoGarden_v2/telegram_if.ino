@@ -7,8 +7,8 @@
 #define CHAT_ID "XXXXXXXXXX"
 
 String chat_id;
-
-
+int ANALOG_PIN = 4;
+extern int prev_flow_state;
 
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
@@ -44,7 +44,14 @@ void handleNewMessages(int numNewMessages)
       bot.sendMessage(chat_id,"Turning Motor OFF");
       bot.sendMessage(CHAT_ID,"Turning Motor OFF");
       btn_activate_stop();
-    }    
+    } 
+
+     else if (text == "status") 
+    {
+      bot.sendMessage(chat_id,"Status");
+      bot.sendMessage(CHAT_ID,"Status");
+      telegram_send_statusMsg();
+    } 
   } 
 }
 
@@ -72,14 +79,29 @@ void telegram_send_flowMsg(int state)
   if (state == 0)
   {
     bot.sendMessage(CHAT_ID, "Water Stagnant");  
+    bot.sendMessage(chat_id, "Water Stagnant");  
   }
 
   else
   {
     bot.sendMessage(CHAT_ID, "Water Flowing");  
+    bot.sendMessage(chat_id, "Water Flowing");  
   }
 }
 
+void telegram_send_adcMsg(int adc_value)
+{
+  String adcMsg = "Analog Data = " + String(adc_value);
+  bot.sendMessage(CHAT_ID, adcMsg);  
+  bot.sendMessage(chat_id, adcMsg);  
+}
+
+void telegram_send_statusMsg(void)
+{
+  int adc_value = analogRead(ANALOG_PIN);
+  telegram_send_adcMsg(adc_value);
+  telegram_send_flowMsg(prev_flow_state);
+}
 
 void telegram_send_SafetyStop(void)
 {
