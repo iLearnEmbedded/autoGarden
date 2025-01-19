@@ -46,7 +46,7 @@ void btn_task(void)
 {
   if(motor_status)
   {
-    if(DELTA_MINS(tm_min, start_tm_min) > MINS_THRESH)
+    if(DELTA_MINS(start_tm_min,tm_min) > MINS_THRESH)
     {
       telegram_send_SafetyStop();
       btn_activate_stop();

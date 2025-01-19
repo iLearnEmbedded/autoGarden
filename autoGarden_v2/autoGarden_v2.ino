@@ -3,11 +3,11 @@
 
 void setup() 
 { 
+  btn_setup();
   wifi_setup();
   telegram_setup();
   flowsensor_setup();
-  time_setup();
-  btn_setup();
+  time_setup();  
 }
 
 void loop() 

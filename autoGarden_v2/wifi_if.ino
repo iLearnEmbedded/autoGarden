@@ -4,13 +4,15 @@ int WIFI_RST_SWITCH = 23;
 WiFiManager wm;
 void wifi_setup(void)
 {
-  Serial.begin(115200); 
-  wm.autoConnect();
-  WiFi.mode(WIFI_STA);
+  Serial.begin(115200);
   pinMode (WIFI_RST_SWITCH, INPUT_PULLUP);
 }
 void wifi_task(void) 
-{    
+{
+  if(WiFi.status() != WL_CONNECTED)
+  {
+    WiFi.begin();     
+  }  
     if(digitalRead(WIFI_RST_SWITCH) == LOW)
     {
           

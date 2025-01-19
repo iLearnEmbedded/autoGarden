@@ -7,8 +7,10 @@
 #define CHAT_ID "XXXXXXXXXX"
 
 String chat_id;
-int ANALOG_PIN = 4;
+int ANALOG_PIN = 34;
 extern int prev_flow_state;
+extern int time_available;
+#define CAL_FACTOR 0.0012 //Derived out of experiments with current meter
 
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
@@ -34,9 +36,18 @@ void handleNewMessages(int numNewMessages)
 
     if (text == "start") 
     {
-      bot.sendMessage(chat_id,"Turning Motor ON");
-      bot.sendMessage(CHAT_ID,"Turning Motor ON");
-      btn_activate_start();
+      if(time_available)
+      {
+        bot.sendMessage(chat_id,"Turning Motor ON");
+        bot.sendMessage(CHAT_ID,"Turning Motor ON");
+        btn_activate_start();
+      }
+      else
+      {
+        bot.sendMessage(chat_id,"Time not available. Please resend the command");
+        bot.sendMessage(CHAT_ID,"Time not available. Please resend the command");      
+      }
+      
     }
 
     else if (text == "stop") 
@@ -91,7 +102,8 @@ void telegram_send_flowMsg(int state)
 
 void telegram_send_adcMsg(int adc_value)
 {
-  String adcMsg = "Analog Data = " + String(adc_value);
+  float current_A = (float) adc_value * CAL_FACTOR;
+  String adcMsg = "Motor Current (A) = " + String(current_A);
   bot.sendMessage(CHAT_ID, adcMsg);  
   bot.sendMessage(chat_id, adcMsg);  
 }
