@@ -36,7 +36,7 @@ void flowsensor_task(void)
     prev_flow_state = flow_state;
     flow_change_bit = 0x80;
 
-    telegram_send_flowMsg(flow_state);
+//    telegram_send_flowMsg(flow_state);
   }   
 }
 

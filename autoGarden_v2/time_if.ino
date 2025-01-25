@@ -36,7 +36,7 @@ void printLocalTime()
   tm_hour = timeinfo.tm_hour;
   tm_min  = timeinfo.tm_min;
   time_available = 1;
-  Serial.println(printBuffer);
+//  Serial.println(printBuffer);
   strftime(printBuffer, 100, "%A, %B %d %Y %H:%M:%S", &timeinfo);
-  Serial.println(printBuffer);
+//  Serial.println(printBuffer);
 }

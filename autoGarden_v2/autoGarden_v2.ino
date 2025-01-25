@@ -1,19 +1,15 @@
-#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-
 
 void setup() 
 { 
   btn_setup();
-  wifi_setup();
-  telegram_setup();
+  mqtt_setup();  
   flowsensor_setup();
   time_setup();  
 }
 
 void loop() 
 {
-    wifi_task();  
-    telegram_task();
+    mqtt_task();      
     flowsensor_task();    
     time_task();
     btn_task();      
