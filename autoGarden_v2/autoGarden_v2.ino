@@ -12,5 +12,6 @@ void loop()
     mqtt_task();      
     flowsensor_task();    
     time_task();
-    btn_task();      
+    btn_task(); 
+    analog_task();     
 }

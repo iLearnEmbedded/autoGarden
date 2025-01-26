@@ -5,8 +5,8 @@
 
 /************************* WiFi Access Point *********************************/
 
-#define WLAN_SSID "xxxxxx"
-#define WLAN_PASS "xxxxx@123"
+#define WLAN_SSID "xxxx"
+#define WLAN_PASS "xxxx@123"
 
 /************************* Adafruit.io Setup *********************************/
 
@@ -17,8 +17,8 @@
 
 // Adafruit IO Account Configuration
 // (to obtain these values, visit https://io.adafruit.com and click on Active Key)
-#define AIO_USERNAME "xxxx"
-#define AIO_KEY      "xxxx"
+#define AIO_USERNAME  "xxxx"
+#define AIO_KEY       "xxxx"
 
 
 /************ Global State (you don't need to change this!) ******************/
@@ -68,11 +68,13 @@ const char* adafruitio_root_ca = \
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
 Adafruit_MQTT_Publish current_a_pub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/current-a");
 Adafruit_MQTT_Publish flow_state_pub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/water-flow-indicator");
+Adafruit_MQTT_Publish link_state_pub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/link-state");
 Adafruit_MQTT_Subscribe motor_switch_sub = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/motor-state");
-
+Adafruit_MQTT_Publish motor_switch_pub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/motor-state");
 
 /*************************** Sketch Code ************************************/
-
+extern uint32_t prev_flow_state;
+extern uint32_t adc_value;
 void mqtt_setup(void)
 {
   delay(10);
@@ -105,34 +107,15 @@ void mqtt_setup(void)
 }
 
 uint32_t x=0;
-
+uint32_t motor_state;
 void mqtt_task(void)
 {
     // Ensure the connection to the MQTT server is alive (this will make the first
   // connection and automatically reconnect when disconnected).  See the MQTT_connect
   // function definition further below.
-  MQTT_connect();
-
-  Adafruit_MQTT_Subscribe *subscription;
-
-  while ((subscription = mqtt.readSubscription(5000)))
-  {
-    if(subscription == &motor_switch_sub)
-    {
-       Serial.println((char *)motor_switch_sub.lastread);
-    }
-  }
-
-//  // Now we can publish stuff!
-//  Serial.print(F("\nSending val "));
-//  Serial.print(x);
-//  Serial.print(F(" to test feed..."));
-//  if (! current_a.publish(x++)) {
-//    Serial.println(F("Failed"));
-//  } else {
-//    Serial.println(F("OK!"));
-//  }
-
+  MQTT_connect();  
+  mqtt_update_status();
+  mqtt_read_switch_state();  
   // wait a couple seconds to avoid rate limit
   delay(2000);
   
@@ -151,6 +134,24 @@ void MQTT_connect() {
 
   Serial.print("Connecting to MQTT... ");
 
+  // Check if the device is already connected
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Connecting to Wi-Fi...");
+
+    // Start Wi-Fi connection
+    WiFi.begin(WLAN_SSID, WLAN_PASS);
+
+    // Wait for connection
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+
+    Serial.println("\nWi-Fi connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  }
+
   uint8_t retries = 3;
   while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
        Serial.println(mqtt.connectErrorString(ret));
@@ -165,4 +166,83 @@ void MQTT_connect() {
   }
 
   Serial.println("MQTT Connected!");
+}
+
+void mqtt_sens_SafetyStop(void)
+{
+  int retval = motor_switch_pub.publish("OFF");
+  Serial.println("MQTT mqtt_sens_SafetyStop sent!");
+}
+
+void mqtt_send_flowMsg(uint32_t state)
+{ 
+  if(flow_state_pub.publish(state))
+  {
+    Serial.println("MQTT mqtt_send_flowMsg success");
+  }
+  else
+  {
+    Serial.println("MQTT mqtt_send_flowMsg fail");
+  } 
+}
+
+void mqtt_read_switch_state(void)
+{
+  Adafruit_MQTT_Subscribe *subscription;
+
+  while ((subscription = mqtt.readSubscription(5000)))
+  {
+    if(subscription == &motor_switch_sub)
+    {
+      if (strcmp((const char*)motor_switch_sub.lastread, "ON") == 0)
+      {
+        btn_activate_start();
+      }
+      else
+      {
+        btn_activate_stop();
+      }
+       Serial.println((char *)motor_switch_sub.lastread);
+    }
+  }
+}
+
+void mqtt_send_adcValue(uint32_t value)
+{
+  if(current_a_pub.publish(value))
+  {
+      Serial.println("MQTT mqtt_send_adcValue success");
+  }
+  else
+  {
+    Serial.println("MQTT mqtt_send_adcValue fail");
+  }
+}
+
+void mqtt_send_motor_state(void)
+{
+  static int mqtt_init_motor_report = 0xFF;
+  if(mqtt_init_motor_report)
+  {
+    if(motor_switch_pub.publish("OFF"))
+    {
+      mqtt_init_motor_report = 0;
+    }
+  }  
+}
+
+void mqtt_send_alive_signal(void)
+{
+  uint32_t link_state_val = 3;
+  if(link_state_pub.publish(link_state_val))
+  {
+    Serial.println("MQTT Link State True");
+  }
+}
+void mqtt_update_status(void)
+{
+  mqtt_send_alive_signal();
+  mqtt_send_motor_state();
+  mqtt_send_flowMsg(prev_flow_state);
+  mqtt_send_adcValue(adc_value);
 }

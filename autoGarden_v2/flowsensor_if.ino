@@ -3,7 +3,7 @@
 #define FLOW_THRESHOLD 50 
 
 int flow_isr_count;
-int flow_state,prev_flow_state; //0 = WATER_STAGNANT; 1 = WATER_FLOWING
+uint32_t flow_state,prev_flow_state; //0 = WATER_STAGNANT; 1 = WATER_FLOWING
 void flowsensor_setup(void)
 {
   pinMode(FLOW_IN_PIN, INPUT_PULLUP);
@@ -36,7 +36,7 @@ void flowsensor_task(void)
     prev_flow_state = flow_state;
     flow_change_bit = 0x80;
 
-//    telegram_send_flowMsg(flow_state);
+    mqtt_send_flowMsg(flow_state);
   }   
 }
 

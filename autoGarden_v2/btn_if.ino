@@ -50,7 +50,7 @@ void btn_task(void)
   {
     if(DELTA_MINS(start_tm_min,tm_min) > MINS_THRESH)
     {
-//      telegram_send_SafetyStop();
+      mqtt_sens_SafetyStop();
       btn_activate_stop();
     }
   }
