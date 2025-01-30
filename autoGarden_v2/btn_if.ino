@@ -9,6 +9,7 @@ int SAFETY_RLY = 5;
 int motor_status = 0;
 
 extern int tm_min;
+extern int time_available;
 int start_tm_min; //Store the time (minutes) during Motor Start Operation
 
 void btn_setup(void)
@@ -48,9 +49,9 @@ void btn_task(void)
 {
   if(motor_status)
   {
-    if(DELTA_MINS(start_tm_min,tm_min) > MINS_THRESH)
+    if((DELTA_MINS(start_tm_min,tm_min) > MINS_THRESH) || (!time_available))
     {
-      mqtt_sens_SafetyStop();
+     comm_send_SafetyStop();
       btn_activate_stop();
     }
   }
