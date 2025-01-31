@@ -3,7 +3,8 @@ int STOP_BTN  = 18;
 int SAFETY_RLY = 5;
 
 
-#define MINS_THRESH   5 //in minutes = Auto Cutoff Threshold Time
+//#define mins_thresh   5 //in minutes = Auto Cutoff Threshold Time - read from routine_if
+extern int mins_thresh;
 
 #define DELTA_MINS(start_min , end_min) ((end_min >= start_min)?(end_min - start_min):(end_min + (60-start_min)))
 int motor_status = 0;
@@ -49,7 +50,7 @@ void btn_task(void)
 {
   if(motor_status)
   {
-    if((DELTA_MINS(start_tm_min,tm_min) > MINS_THRESH) || (!time_available))
+    if((DELTA_MINS(start_tm_min,tm_min) > mins_thresh) || (!time_available))
     {
      comm_send_SafetyStop();
       btn_activate_stop();

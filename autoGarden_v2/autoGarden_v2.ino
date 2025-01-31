@@ -5,6 +5,7 @@ void setup()
   comm_setup();  
   flowsensor_setup();
   time_setup();  
+  routine_setup();
 }
 
 void loop() 
@@ -13,5 +14,6 @@ void loop()
     flowsensor_task();    
     time_task();
     btn_task(); 
-    analog_task();     
+    analog_task();    
+    routine_loop(); 
 }

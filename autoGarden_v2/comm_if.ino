@@ -21,6 +21,7 @@ UniversalTelegramBot bot(BOTtoken, client);
 uint32_t x=0;
 uint32_t motor_state;
 extern int time_available;
+int device_restart_flag;
 
 
 /*************************** Sketch Code ************************************/
@@ -82,7 +83,7 @@ void comm_connect() {
 
     Serial.println("\nWi-Fi connected!");
     Serial.print("IP Address: ");
-    Serial.println(WiFi.localIP());
+    Serial.println(WiFi.localIP());    
   }  
 }
 
@@ -96,7 +97,14 @@ void comm_check_new_messages(void)
     {
       handleNewMessages(numNewMessages);
       numNewMessages = bot.getUpdates(bot.last_message_received + 1);
-    }    
+    }  
+
+    if(!device_restart_flag)
+    {
+      device_restart_flag = 1;
+      comm_send_message("Device Restarted..");
+      comm_update_status();
+    }
   }
 }
 
@@ -128,8 +136,7 @@ void handleNewMessages(int numNewMessages)
       else
       {
         comm_send_message("Time not available. Please resend the command");        
-      }
-      
+      }      
     }
 
     else if (text == "stop") 
@@ -139,10 +146,28 @@ void handleNewMessages(int numNewMessages)
       comm_update_status();
     } 
 
-     else if (text == "status") 
+    else if (text == "status") 
     {      
       comm_update_status();
-    } 
+    }
+
+    int pos1 = text.indexOf("routine ");
+    if (pos1 != -1) {
+       String numberString = text.substring(pos1 + 8); // "routine " has 8 characters
+       int hh = numberString.toInt();
+       routine_write(hh);
+       comm_send_message("Routine update successful");
+       comm_update_status();
+    }
+
+    int pos2 = text.indexOf("thresh ");
+    if (pos2 != -1) {
+       String numberString = text.substring(pos2 + 7); // "thresh " has 7 characters
+       int thresh = numberString.toInt();
+       thresh_write(thresh);
+       comm_send_message("Thresh update successful");
+       comm_update_status();
+    }    
   } 
 }
 
@@ -154,9 +179,8 @@ void comm_send_SafetyStop(void)
  comm_update_status();
 }
 
-
-void comm_send_flowMsg(uint32_t state)
-{ 
+String construct_flowMsg(uint32_t state)
+{
   String flow_state;
   if(state)
   {
@@ -166,20 +190,28 @@ void comm_send_flowMsg(uint32_t state)
   {
     flow_state = "Water not flowing";
   }  
-  comm_send_message(flow_state);
+  return flow_state;
 }
 
+void comm_send_flowMsg(uint32_t state)
+{   
+  comm_send_message(construct_flowMsg(state));
+}
 
-void comm_send_adcValue(uint32_t value)
+String construct_adc_data(uint32_t value)
 {
   String adc_data_s = "ADC Value = " + String(value);
-  comm_send_message(adc_data_s);
+  return adc_data_s;
+}
+void comm_send_adcValue(uint32_t value)
+{
+  comm_send_message(construct_adc_data(value));
 }
 
 void comm_update_status(void)
 {
- comm_send_flowMsg(prev_flow_state);
- comm_send_adcValue(adc_value);
+ String status_update =  "Flow: "+construct_flowMsg(prev_flow_state) + " | " + construct_adc_data(adc_value) + " | " + " Routine HH = " + String(routine_read()) + " | " + " Threshold mins = " + String(thresh_read()); 
+ comm_send_message(status_update);
 }
 
 void comm_send_message(String text)

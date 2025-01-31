@@ -5,7 +5,7 @@ const char* ntpServer1 = "pool.ntp.org";
 const char* time_zone = "IST-5:30";
 
 int time_available;
-int tm_hour,tm_min;
+int tm_hour,tm_min,tm_date;
 void time_setup()
 {
   configTzTime(time_zone, ntpServer1);
@@ -35,6 +35,7 @@ void printLocalTime()
                         timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
   tm_hour = timeinfo.tm_hour;
   tm_min  = timeinfo.tm_min;
+  tm_date = timeinfo.tm_mday;
   time_available = 1;
 //  Serial.println(printBuffer);
   strftime(printBuffer, 100, "%A, %B %d %Y %H:%M:%S", &timeinfo);
