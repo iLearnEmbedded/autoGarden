@@ -4,6 +4,7 @@
 
 #define MINS_THRESH_ADDR 0
 #define ROUTINE_HH_ADDR  1
+#define ROUTINE_PENDING_ADDR  2
 
 int mins_thresh = 5;
 int routine_hh = 7;  //watering daily at 7 A.M in the morning
@@ -89,21 +90,27 @@ int thresh_read(void)
 
 void routine_loop(void)
 {
+  return;
   static int routine_pending;
   static int prev_date;
   
   if((!routine_setup_done) || (!time_available))
     return;
 
+  routine_pending = EEPROM.read(ROUTINE_PENDING_ADDR); 
   if(prev_date != tm_date)
   {
     prev_date = tm_date;
     routine_pending = 1;
+    EEPROM.write(ROUTINE_PENDING_ADDR, routine_pending);  // Store at address 
+    EEPROM.commit();         // Save changes to Flash
   }
 
   if((routine_pending) && (tm_hour >= routine_hh))
   {
     routine_pending = 0;
+    EEPROM.write(ROUTINE_PENDING_ADDR, routine_pending);  // Store at address 
+    EEPROM.commit();         // Save changes to Flash
     btn_activate_start();    
     comm_send_message("Routine Watering Start");
     delay(5000);

@@ -1,6 +1,6 @@
 
 #define FLOW_IN_PIN 32
-#define FLOW_THRESHOLD 50 
+#define FLOW_THRESHOLD 15 
 
 int flow_isr_count;
 uint32_t flow_state,prev_flow_state; //0 = WATER_STAGNANT; 1 = WATER_FLOWING

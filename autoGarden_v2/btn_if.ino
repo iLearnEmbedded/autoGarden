@@ -51,9 +51,9 @@ void btn_task(void)
   if(motor_status)
   {
     if((DELTA_MINS(start_tm_min,tm_min) > mins_thresh) || (!time_available))
-    {
-     comm_send_SafetyStop();
+    {     
       btn_activate_stop();
+      comm_send_SafetyStop();
     }
   }
 }
