@@ -5,11 +5,12 @@
 #define MINS_THRESH_ADDR 0
 #define ROUTINE_HH_ADDR  1
 #define ROUTINE_PENDING_ADDR  2
+#define ADC_CAL_FACTOR_ADDR 3
 
 int mins_thresh = 5;
 int routine_hh = 7;  //watering daily at 7 A.M in the morning
 int routine_setup_done;
-
+int adc_cal_factor = 10769;
 
 extern int tm_hour;
 extern int tm_date;
@@ -41,9 +42,25 @@ void routine_setup(void)
     EEPROM.commit();         // Save changes to Flash
   }
 
+  EEPROM.get(ADC_CAL_FACTOR_ADDR,adc_cal_factor);
+  if(adc_cal_factor < 1000)
+  {
+    EEPROM.put(ADC_CAL_FACTOR_ADDR, 10769);  // Store at address 1
+    EEPROM.commit();         // Save changes to Flash
+  }
+
+
   routine_hh = eep_readval;
 
   routine_setup_done = 1;
+}
+
+void adc_cal_write(int value)
+{
+  adc_cal_factor = value;    
+  EEPROM.put(ADC_CAL_FACTOR_ADDR, value);  // Store at address 1
+  EEPROM.commit();         // Save changes to Flash
+  
 }
 
 void routine_write(int value)
@@ -65,6 +82,11 @@ void routine_write(int value)
 int routine_read(void)
 {
   return routine_hh;
+}
+
+int cal_read(void)
+{
+  return adc_cal_factor;
 }
 
 void thresh_write(int value)

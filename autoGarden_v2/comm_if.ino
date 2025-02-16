@@ -22,6 +22,7 @@ uint32_t x=0;
 uint32_t motor_state;
 extern int time_available;
 int device_restart_flag;
+extern int adc_cal_factor;
 
 
 /*************************** Sketch Code ************************************/
@@ -168,6 +169,16 @@ void handleNewMessages(int numNewMessages)
        comm_send_message("Thresh update successful");
        comm_update_status();
     }    
+
+    int pos3 = text.indexOf("cal ");
+    if(pos3 != -1)
+    {
+      String numberString = text.substring(pos3 + 4); //"cal " has 4 chars
+      adc_cal_factor = numberString.toInt();
+      adc_cal_write(adc_cal_factor);
+      comm_send_message("cal update successful");
+      comm_update_status();
+    }
   } 
 }
 
@@ -200,7 +211,8 @@ void comm_send_flowMsg(uint32_t state)
 
 String construct_adc_data(uint32_t value)
 {
-  String adc_data_s = "ADC Value = " + String(value);
+  float current = (float)(value * adc_cal_factor)/1000000;
+  String adc_data_s = "Motor Current = " + String(current) + "A " +"ADC Value = " + String(value);
   return adc_data_s;
 }
 void comm_send_adcValue(uint32_t value)
@@ -210,7 +222,7 @@ void comm_send_adcValue(uint32_t value)
 
 void comm_update_status(void)
 {
- String status_update =  "Flow: "+construct_flowMsg(prev_flow_state) + " | " + construct_adc_data(adc_value) + " | " + " Routine HH = " + String(routine_read()) + " | " + " Threshold mins = " + String(thresh_read()); 
+ String status_update =  "Flow: "+construct_flowMsg(prev_flow_state) + " | " + construct_adc_data(adc_value) + " | " + " ADC cal = " + String(cal_read()) + " | " + " Threshold mins = " + String(thresh_read()); 
  comm_send_message(status_update);
 }
 
